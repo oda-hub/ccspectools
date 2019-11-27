@@ -34,6 +34,9 @@ def view_group_spectra(r, reference_instrument, subcases_pattern):
             #reference_date=ff[1].header['DATE-OBS'] + '--'+ ff[1].header['DATE-END']
             ff.flush()
             ff.close()
+    elif reference_instrument.lower().replace("'","") == 'none':
+        reference_exposure='N/A'
+        reference_times='N/A'
     else:
         print("Undefined reference instrument")
         raise ValueError
@@ -84,14 +87,16 @@ def fit(data, reference_instrument, model_setter, systematic_fraction, emin_valu
 
     xspec.AllModels.systematic=systematic_fraction   
 
-    for c_emin in emin_values: #np.linspace(17,40,5):
-        #freeze parameters apart from norm and E_cyc
-        
+    for c_emin in emin_values:
+
         xspec.AllData.clear()
 
         isgri, ref = model_setter(data, reference_instrument, c_emin)
 
-        xspec.Fit.error("1.0 max 5.0 1-%d"%(2*isgri.nParameters))
+        if ref is not None:
+            xspec.Fit.error("1.0 max 5.0 1-%d"%(2*isgri.nParameters))
+        else:
+            xspec.Fit.error("1.0 max 5.0 1-%d"%(isgri.nParameters))
 
         models={}
 
@@ -106,6 +111,8 @@ def fit(data, reference_instrument, model_setter, systematic_fraction, emin_valu
             )
             
         for m,ss in (isgri, 'isgri'), (ref, 'ref'):
+            if m is None: continue
+
             #initialize dictionaries
             models[ss]={}
             #models[ss]['flux']={}
@@ -148,7 +155,7 @@ def fit(data, reference_instrument, model_setter, systematic_fraction, emin_valu
 
         _=display(Image(filename=fn,format="png"))
 
-        return fit_by_lt, fn_by_lt
+    return fit_by_lt, fn_by_lt
 
 
 def parameter_comparison(good_lt, ng_sig_limit):
