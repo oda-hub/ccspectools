@@ -7,7 +7,7 @@ import numpy as np
 from IPython.display import Image
 
 
-def view_group_spectra(r, reference_instrument, subcases_pattern):
+def view_group_spectra(r, reference_instrument, subcases_pattern, systematic_fraction=0.):
     # I add response and arf keywords for easier reading
     import astropy.io.fits as pf
 
@@ -45,6 +45,7 @@ def view_group_spectra(r, reference_instrument, subcases_pattern):
     ff=pf.open(r["isgri_spec"],  mode='update')
     ff[1].header['RESPFILE']=r["isgri_rmf"]
     ff[1].header['ANCRFILE']=r["isgri_arf"]
+    ff[1].data['SYS_ERR']=systematic_fraction
     mjdref=51544.
     tstart=float(ff[1].header['TSTART']) + mjdref
     tstop=float(ff[1].header['TSTOP']) + mjdref
