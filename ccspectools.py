@@ -192,7 +192,7 @@ def parameter_comparison(good_lt, ng_sig_limit, reference_instrument, flux_toler
         print(par_name+" %.2f +/- %.2f ; %.2f +/- %.2f ; %.1f"%(isgri_value, err_isgri, ref_value, err_ref, par_diff_sigmas))
         
         #We do not compare the normalization with NuSTAR strictly, because of non-simultaneity issues
-        if ( ('log10Flux' in par_name) or ('norm'in par_name) ) and (reference_instrument == 'nustar') :
+        if ( ('log10Flux' in par_name) or ('norm'in par_name) ) and (reference_instrument.lower() == 'nustar') :
             success=True
         elif 'log10Flux' in par_name:
             frac_difference = np.abs( 1 - 10**(isgri_value - ref_value))
