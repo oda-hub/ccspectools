@@ -94,10 +94,12 @@ def fit(data, reference_instrument, model_setter, systematic_fraction, emin_valu
 
         isgri, ref = model_setter(data, reference_instrument, c_emin)
 
+        max_chi=np.ceil(xspec.Fit.statistic / xspec.Fit.dof)
+
         if ref is not None:
-            xspec.Fit.error("1.0 max 5.0 1-%d"%(2*isgri.nParameters))
+            xspec.Fit.error("1.0 max %.1f 1-%d"%(max_chi,2*m1.nParameters))
         else:
-            xspec.Fit.error("1.0 max 5.0 1-%d"%(isgri.nParameters))
+            xspec.Fit.error("1.0 max %.1f 1-%d"%(max_chi,m1.nParameters))
 
         models={}
 
