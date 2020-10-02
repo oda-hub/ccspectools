@@ -91,6 +91,7 @@ def fit(data, reference_instrument, model_setter, systematic_fraction, emin_valu
     for c_emin in emin_values:
 
         xspec.AllData.clear()
+        xspec.AllModels.clear()
 
         isgri, ref = model_setter(data, reference_instrument, c_emin)
 
@@ -188,10 +189,10 @@ def parameter_comparison(good_lt, ng_sig_limit, flux_tolerance=0.05):
         #We do not compare the normalization with NuSTAR strictly, because of non-simultaneity issues
         if ( ('log10Flux' in par_name) or ('norm'in par_name) ) and (reference_instrument == 'nustar') :
             success=True
-        else if 'log10Flux' in par_name:
+        elif 'log10Flux' in par_name:
             frac_difference = np.abs( 1 - 10**(isgri_value - ref_value))
             success = bool(frac_difference < flux_tolerance)
-        else if 'norm' in par_name:
+        elif 'norm' in par_name:
             frac_difference = np.abs( 1 - isgri_value /ref_value)
             success = bool(frac_difference < flux_tolerance)
         else:
