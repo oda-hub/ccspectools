@@ -76,7 +76,7 @@ def basic_consistency(fit_by_lt, nh_sig_limit):
         print("%.1f\t%.2f\t%.2f\t%.2f"%(float(lt), d['chi2_red'], d['nh_prob'], d['nh_sig']) )
         
     #good_lt = min([p for p in fit_by_lt.items() if p[1]['nh_sig']< nh_sig_limit], key=lambda x:x[1]['chi2_red'i])
-    good_lt = min([p for p in fit_by_lt.items() ], key=lambda x:x[1]['chi2_red'i])
+    good_lt = min([p for p in fit_by_lt.items() ], key=lambda x:x[1]['chi2_red'])
 
     return good_lt
 
