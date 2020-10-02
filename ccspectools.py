@@ -80,25 +80,29 @@ def basic_consistency(fit_by_lt, nh_sig_limit):
     return good_lt
 
 
-def fit(data, reference_instrument, model_setter, systematic_fraction, emin_values, fn_prefix=""):
+def fit(data, reference_instrument, model_setter, emin_values, fn_prefix=""):
     importlib.reload(xspec)
 
     fit_by_lt = {}
     fn_by_lt={}
 
-    xspec.AllModels.systematic=systematic_fraction   
+    xspec.AllModels.systematic=0.0
 
     for c_emin in emin_values:
 
         xspec.AllData.clear()
         xspec.AllModels.clear()
 
-        isgri, ref = model_setter(data, reference_instrument, c_emin)
+        isgri, ref_ind = model_setter(data, reference_instrument, c_emin)
+
+        
 
         max_chi=np.ceil(xspec.Fit.statistic / xspec.Fit.dof)
+        m1=xspec.AllModels(1)
 
-        if ref is not None:
-            xspec.Fit.error("1.0 max %.1f 1-%d"%(max_chi,2*m1.nParameters))
+        if ref_ind is not None:
+            xspec.Fit.error("1.0 max %.1f 1-%d"%(max_chi,len(ref_ind)*m1.nParameters))
+            ref=ref_ind[0]
         else:
             xspec.Fit.error("1.0 max %.1f 1-%d"%(max_chi,m1.nParameters))
 
@@ -162,7 +166,7 @@ def fit(data, reference_instrument, model_setter, systematic_fraction, emin_valu
     return fit_by_lt, fn_by_lt
 
 
-def parameter_comparison(good_lt, ng_sig_limit, flux_tolerance=0.05):
+def parameter_comparison(good_lt, ng_sig_limit, reference_instrument, flux_tolerance=0.05):
     #compare parameters of best fit
     parameter_comparison={}
     best_result=good_lt[1]
