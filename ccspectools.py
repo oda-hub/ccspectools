@@ -161,7 +161,7 @@ def fit(data, reference_instrument, model_setter, systematic_fraction, emin_valu
     return fit_by_lt, fn_by_lt
 
 
-def parameter_comparison(good_lt, ng_sig_limit):
+def parameter_comparison(good_lt, ng_sig_limit, flux_tolerance=0.05):
     #compare parameters of best fit
     parameter_comparison={}
     best_result=good_lt[1]
@@ -188,6 +188,12 @@ def parameter_comparison(good_lt, ng_sig_limit):
         #We do not compare the normalization with NuSTAR strictly, because of non-simultaneity issues
         if ( ('log10Flux' in par_name) or ('norm'in par_name) ) and (reference_instrument == 'nustar') :
             success=True
+        else if 'log10Flux' in par_name:
+            frac_difference = np.abs( 1 - 10**(isgri_value - ref_value))
+            success = bool(frac_difference < flux_tolerance)
+        else if 'norm' in par_name:
+            frac_difference = np.abs( 1 - isgri_value /ref_value)
+            success = bool(frac_difference < flux_tolerance)
         else:
             success = bool(np.abs(par_diff_sigmas) < ng_sig_limit)
         
