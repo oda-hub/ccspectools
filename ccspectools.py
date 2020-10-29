@@ -84,13 +84,13 @@ def basic_consistency(fit_by_lt, nh_sig_limit):
     return good_lt
 
 
-def fit(data, reference_instrument, model_setter, emin_values, fn_prefix=""):
+def fit(data, reference_instrument, model_setter, emin_values, fn_prefix="", systematic_fraction=0):
     importlib.reload(xspec)
 
     fit_by_lt = {}
     fn_by_lt={}
 
-    xspec.AllModels.systematic=0.0
+    xspec.AllModels.systematic=systematic_fraction
 
     for c_emin in emin_values:
 
