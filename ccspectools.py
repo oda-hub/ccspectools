@@ -106,7 +106,7 @@ def fit(data, reference_instrument, model_setter, emin_values, fn_prefix="", sys
 
         if ref_ind is not None:
             n_spec = 2
-            if isinstance(list, ref_ind):
+            if isinstance(ref_ind, list):
                 n_spec = len(ref_ind) + 1
             xspec.Fit.error("1.0 max %.1f 1-%d"%(max_chi, n_spec*m1.nParameters))
             ref = ref_ind[0]
@@ -173,7 +173,7 @@ def fit(data, reference_instrument, model_setter, emin_values, fn_prefix="", sys
     return fit_by_lt, fn_by_lt
 
 
-def parameter_comparison(good_lt, ng_sig_limit, reference_instrument, flux_tolerance=0.05):
+def parameter_comparison(good_lt, ng_sig_limit, reference_instrument, flux_tolerance=0.1):
     #compare parameters of best fit
     parameter_comparison={}
     best_result=good_lt[1]
@@ -194,21 +194,26 @@ def parameter_comparison(good_lt, ng_sig_limit, reference_instrument, flux_toler
             err_isgri = - (par_values_isgri[1] - isgri_value)
 
         par_diff_sigmas = (isgri_value - ref_value) / np.sqrt(err_ref**2 + err_isgri**2)
-        
-        print(par_name+" %.2f +/- %.2f ; %.2f +/- %.2f ; %.1f"%(isgri_value, err_isgri, ref_value, err_ref, par_diff_sigmas))
+
+        print(par_name + " %.2f +/- %.2f ; %.2f +/- %.2f ; %.1f" % (
+        isgri_value, err_isgri, ref_value, err_ref, par_diff_sigmas))
         
         #We do not compare the normalization with NuSTAR strictly, because of non-simultaneity issues
         if (('g10Flux' in par_name) or ('norm' in par_name)) and (reference_instrument.lower() == 'nustar') :
             print("Not comparing %s for %s"%(par_name, reference_instrument))
             success = True
-        elif 'g10Flux' in par_name:
+        elif 'g10Flux' in par_name and np.abs(par_diff_sigmas) > ng_sig_limit:
             frac_difference = np.abs( 1 - 10**(isgri_value - ref_value))
+            print("Using a fractional difference of %f to compare %s for %s" % (frac_difference,
+                                                                                par_name, reference_instrument))
             success = bool(frac_difference < flux_tolerance)
-        elif 'norm' in par_name:
+        elif 'norm' in par_name and np.abs(par_diff_sigmas) > ng_sig_limit:
             frac_difference = np.abs( 1 - isgri_value / ref_value)
+            print("Using a fractional difference of %f to compare %s for %s" % (frac_difference,
+                                                                                par_name, reference_instrument))
             success = bool(frac_difference < flux_tolerance)
         else:
-            print("standard comparison for %s"%par_name)
+            #print("standard comparison for %s"%par_name)
             success = bool(np.abs(par_diff_sigmas) < ng_sig_limit)
 
         parameter_comparison[par_name] = dict(
