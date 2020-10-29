@@ -115,7 +115,7 @@ def fit(data, reference_instrument, model_setter, emin_values, fn_prefix="", sys
 
         models={}
 
-        lt_key='%.10lg'%c_emin    
+        lt_key='%.10lg'%c_emin
     
         fit_by_lt[lt_key]=dict(
                 emin=c_emin,
@@ -125,7 +125,7 @@ def fit(data, reference_instrument, model_setter, emin_values, fn_prefix="", sys
                 models=models,
             )
             
-        for m,ss in (isgri, 'isgri'), (ref, 'ref'):
+        for m, ss in (isgri, 'isgri'), (ref, 'ref'):
             if m is None: continue
 
             #initialize dictionaries
@@ -199,28 +199,23 @@ def parameter_comparison(good_lt, ng_sig_limit, reference_instrument, flux_toler
         
         #We do not compare the normalization with NuSTAR strictly, because of non-simultaneity issues
         if (('g10Flux' in par_name) or ('norm' in par_name)) and (reference_instrument.lower() == 'nustar') :
+            print("Not comparing %s for %s"%(par_name, reference_instrument))
             success = True
         elif 'g10Flux' in par_name:
             frac_difference = np.abs( 1 - 10**(isgri_value - ref_value))
             success = bool(frac_difference < flux_tolerance)
         elif 'norm' in par_name:
-            frac_difference = np.abs( 1 - isgri_value /ref_value)
+            frac_difference = np.abs( 1 - isgri_value / ref_value)
             success = bool(frac_difference < flux_tolerance)
         else:
+            print("standard comparison for %s"%par_name)
             success = bool(np.abs(par_diff_sigmas) < ng_sig_limit)
-        
-        
+
         parameter_comparison[par_name] = dict(
-        
             ref = [ref_value, err_ref],
             isgri = [isgri_value, err_isgri ],
-            
             significance = np.abs(par_diff_sigmas),
-            
             success=success
-            
-            
-            
         )
 
     return parameter_comparison
