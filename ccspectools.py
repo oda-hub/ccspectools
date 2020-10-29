@@ -105,10 +105,13 @@ def fit(data, reference_instrument, model_setter, emin_values, fn_prefix="", sys
         m1=xspec.AllModels(1)
 
         if ref_ind is not None:
-            xspec.Fit.error("1.0 max %.1f 1-%d"%(max_chi,len(ref_ind)*m1.nParameters))
-            ref=ref_ind[0]
+            n_spec = 2
+            if isinstance(list, ref_ind):
+                n_spec = len(ref_ind) + 1
+            xspec.Fit.error("1.0 max %.1f 1-%d"%(max_chi, n_spec*m1.nParameters))
+            ref = ref_ind[0]
         else:
-            xspec.Fit.error("1.0 max %.1f 1-%d"%(max_chi,m1.nParameters))
+            xspec.Fit.error("1.0 max %.1f 1-%d" % (max_chi,m1.nParameters))
 
         models={}
 
@@ -151,7 +154,7 @@ def fit(data, reference_instrument, model_setter, emin_values, fn_prefix="", sys
         if os.path.exists(xcmfile):
             os.remove(xcmfile)
 
-        xspec.XspecSettings.save(xspec.XspecSettings,xcmfile, info='a')
+        xspec.XspecSettings.save(xspec.XspecSettings, xcmfile, info='a')
 
         xspec.Plot.device="/png"
         #xspec.Plot.addCommand("setplot en")
@@ -180,17 +183,17 @@ def parameter_comparison(good_lt, ng_sig_limit, reference_instrument, flux_toler
         except:
             print("parameter %s is not in isgri parameter list"%(par_name))
             continue
-        isgri_value= par_values_isgri[0]
-        ref_value  = par_values_ref[0]
+        isgri_value = par_values_isgri[0]
+        ref_value = par_values_ref[0]
         
         if ref_value > isgri_value:
-            err_ref  =  ref_value - par_values_ref[1]
+            err_ref = ref_value - par_values_ref[1]
             err_isgri = par_values_isgri[2] - isgri_value
         else:
-            err_ref  =  - (ref_value - par_values_ref[2] )
-            err_isgri = - (par_values_isgri[1] - isgri_value )
+            err_ref = - (ref_value - par_values_ref[2])
+            err_isgri = - (par_values_isgri[1] - isgri_value)
 
-        par_diff_sigmas = (isgri_value - ref_value) /np.sqrt(err_ref**2 + err_isgri**2)
+        par_diff_sigmas = (isgri_value - ref_value) / np.sqrt(err_ref**2 + err_isgri**2)
         
         print(par_name+" %.2f +/- %.2f ; %.2f +/- %.2f ; %.1f"%(isgri_value, err_isgri, ref_value, err_ref, par_diff_sigmas))
         
