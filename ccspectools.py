@@ -74,14 +74,19 @@ def basic_consistency(fit_by_lt, nh_sig_limit):
         d['nh_prob']=stats.chi2(d['ndof']).sf(d['chi2'])
         d['nh_sig']=stats.norm().isf(d['nh_prob'])
         print("%.1f\t%.2f\t%.2f\t%.2f"%(float(lt), d['chi2_red'], d['nh_prob'], d['nh_sig']) )
-        
-    good_lt = min([p for p in fit_by_lt.items() if p[1]['nh_sig']< nh_sig_limit])
+    try:
+        good_lt = min([p for p in fit_by_lt.items() if p[1]['nh_sig']< nh_sig_limit])
+    except:
+        good_lt = None
     best_lt = min([p for p in fit_by_lt.items()], key=lambda x:x[1]['chi2_red'])
 
     if good_lt != best_lt:
         print("\033[31mNote that in this case, best LT does not coincde with the good LT. We want broader energy range\033[0m")
 
-    return good_lt
+    if good_lt is not None:
+        return good_lt
+    else:
+        return best_lt
 
 
 def fit(data, reference_instrument, model_setter, emin_values, fn_prefix="", systematic_fraction=0):
