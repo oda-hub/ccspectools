@@ -13,8 +13,15 @@ def view_group_spectra(r, reference_instrument, subcases_pattern, systematic_fra
 
     if reference_instrument.lower() == 'spi':
         ff=pf.open(r["reference_spec"],  mode='update')
-        ff[2].header['RESPFILE']=r["reference_rmf"]
-        reference_exposure=ff[2].header['EXPOSURE']
+        try:
+            reference_exposure=ff[2].header['EXPOSURE']
+            ff[2].header['RESPFILE']=r["reference_rmf"]
+        except:
+            try:
+                reference_exposure=ff[1].header['EXPOSURE']
+                ff[1].header['RESPFILE']=r["reference_rmf"]
+            except:
+                raise ValueError("Exposure should be in SPI spectrum!")
         reference_times='N/A'
         ff.flush()
         ff.close()
@@ -75,7 +82,7 @@ def basic_consistency(fit_by_lt, nh_sig_limit):
         d['nh_sig']=stats.norm().isf(d['nh_prob'])
         print("%.1f\t%.2f\t%.2f\t%.2f"%(float(lt), d['chi2_red'], d['nh_prob'], d['nh_sig']) )
     try:
-        good_lt = min([p for p in fit_by_lt.items() if p[1]['nh_sig']< nh_sig_limit])
+        good_lt = min([p for p in fit_by_lt.items() if p[1]['nh_sig'] < nh_sig_limit])
     except:
         good_lt = None
     best_lt = min([p for p in fit_by_lt.items()], key=lambda x:x[1]['chi2_red'])
