@@ -2,6 +2,7 @@ from scipy import stats
 import shutil
 import importlib
 import xspec
+import astropy.io.fits as fits
 import os
 import numpy as np
 from IPython.display import Image
@@ -237,3 +238,38 @@ def parameter_comparison(good_lt, ng_sig_limit, reference_instrument, flux_toler
 
     return parameter_comparison
 
+
+def write_down_oda_spectrum(spectrum, write_to_dir):
+    all_ext = []
+
+    files_by_source_name = {}
+
+    for name in set([s.meta_data['src_name'] for s in spectrum._p_list]):
+        print(f"writting down spectra for {name}")
+        
+        d = {}
+        files_by_source_name[name] = d
+        
+        src_name_stub = name.replace(' ', '_').replace('+','p')    
+        
+        d['spec_fn'] = write_to_dir + "/isgri_spectrum_{}.fits".format(src_name_stub)
+        d['arf_fn'] = write_to_dir + "/isgri_arf_{}.fits".format(src_name_stub)
+        d['rmf_fn'] = write_to_dir + "/isgri_rmf_{}.fits".format(src_name_stub)
+
+        specprod_for_source = [l for l in spectrum._p_list if l.meta_data['src_name'] == name ]
+
+        for p in specprod_for_source:
+            print(p.meta_data)
+
+        specprod_for_source[0].write_fits_file(d['spec_fn'])
+        specprod_for_source[1].write_fits_file(d['arf_fn'])
+        specprod_for_source[2].write_fits_file(d['rmf_fn'])
+        
+        all_ext.extend(fits.open(d['spec_fn'])[1:])
+        all_ext.extend(fits.open(d['arf_fn'])[1:])
+        all_ext.extend(fits.open(d['rmf_fn'])[1:])
+        
+    all_spectra_file = "isgri_all.fits"
+    fits.HDUList([fits.PrimaryHDU()] + all_ext).writeto(all_spectra_file, overwrite=True)
+
+    return files_by_source_name, all_spectra_file
