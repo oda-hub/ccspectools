@@ -100,6 +100,9 @@ def basic_consistency(fit_by_lt, nh_sig_limit):
 def fit(data, reference_instrument, model_setter, emin_values, fn_prefix="", systematic_fraction=0):
     importlib.reload(xspec)
 
+    if isinstance(emin_values, str):
+        emin_values = map(float, emin_values.split(","))
+
     fit_by_lt = {}
     fn_by_lt={}
 
